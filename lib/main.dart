@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'core/theme/app_theme.dart';
-import 'presentation/pages/login_screen.dart';
+import 'package:school_student_app/constant/student_app_color.dart';
+import 'package:school_student_app/cubit/login/login_cubit.dart';
+import 'package:school_student_app/network/dio_client.dart';
+import 'package:school_student_app/repository/auth_repository.dart';
+import 'package:school_student_app/service/auth_service.dart';
 
-void main() {
+import 'presentation/screens/login_screen.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await DioClient.init();
+
   runApp(const StudentApp());
 }
 
@@ -12,11 +22,24 @@ class StudentApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Student App',
-      theme: AppTheme.lightTheme,
-      home: const LoginScreen(),
+    return BlocProvider(
+      create: (_) => LoginCubit(
+        AuthRepository(
+          AuthService(DioClient.dio),
+        ),
+      ),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Student App',
+        theme: ThemeData(
+          useMaterial3: true,
+          scaffoldBackgroundColor: StudentAppColors.background,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: StudentAppColors.primary,
+          ),
+        ),
+        home: const LoginScreen(),
+      ),
     );
   }
 }
